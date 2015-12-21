@@ -2,7 +2,7 @@
 #include <utility>
 #include <string>
 
-#include "rigid_list.h"
+#include "../include/rigid_list.h"
 #include "string.h"
 
 std::string _current_test_name;
