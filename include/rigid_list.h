@@ -12,11 +12,22 @@
  * \mainpage
  * A version of std::list that only allocates memory when you tell it to.
  *
+ * EXAMPLE:
+ * @code
+ * rigid_list<int> list(10);
+ * printf("capacity = %d, size = %d, free size = %d.\n", (int)list.capacity(), (int)list.size(), (int)list.free_size() );
+ * //prints out: capacity = 10, size = 0, free size = 10.
+ * int i = 0;
+ * while( list.push_back(i) ) { i++; }
+ * printf("The last element that fit in the list was %d.\n", *(--list.end()) );
+ * //prints out: The last element that fit in the list was 9.
+ * @endcode
+ *
  * This is the same as std::list except that it only uses preallocated memory and fails to grow when it runs out of it.
- * Use reserve( n ) to preallocate memory for n list elements.
- * Then you can push_back() up to n elements and they will be stored in the list
+ * Use rigid_list::reserve() to preallocate memory for a given number of list elements.
+ * Then you can rigid_list::push_back() up to the reserved number of elements and they will be stored in the list
  * without the list allocating any new memory.
- * If you push_back() more elements beyond n+1, they will not be added and push_back() will return false.
+ * If you push_back() more elements than you've reserved() space for, they will not be added and push_back() will return false.
  *
  * You can increase the capacity of the list by calling reserve( m ) where m > n and continue push_back()-ing more elements into it.
  *
