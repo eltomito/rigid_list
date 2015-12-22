@@ -43,6 +43,8 @@
  * - size()
  * - sort()
  *
+ * PERFORMANCE NOTE:
+ * In gcc use at least -O2 to make rigid_list outperform std::list. With -O1, rigid_list is terribly slow. (tested with gcc 4.8.4).
  */
 template <class T> class rigid_list : public std::list<T>
 {
