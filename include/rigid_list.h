@@ -3,10 +3,7 @@
 
 #include <list>
 #include <stddef.h>
-
-#ifndef abs
-#define abs( n ) ((n >= 0) ? n : n*(-1))
-#endif //abs
+#include <cstdlib>
 
 /**
  * \mainpage
