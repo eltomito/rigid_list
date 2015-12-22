@@ -9,16 +9,17 @@ typedef struct timeval timevalT;
 class Runner
 {
 public:
-	Runner( int _count ) { SetCount( _count ); };
+	Runner( const char *_name, int _count ) { name = _name; SetCount( _count ); };
 	double Result() { return timevalToSeconds( endTime ) - timevalToSeconds( startTime ); };
 	double Run() { init(); start(); action(); stop(); cleanup(); return Result(); };
 	void SetCount( int _count ) { count = _count; };
+	std::string name;
 protected:
 	virtual void action() {};
 	virtual void init() {};
 	virtual void cleanup() {};
 	int count;
-private:	
+private:
 	inline void start() { gettimeofday(&startTime, NULL); };
 	inline void stop() { gettimeofday(&endTime, NULL); };
 	inline double timevalToSeconds( timevalT &t ) {  return (double)t.tv_sec + ((double)t.tv_usec/(double)1000000.0); };
@@ -30,7 +31,7 @@ private:
 template <class listT, class itemT> class PushBackRunner : public Runner
 {
 public:
-	PushBackRunner( listT &_list, int _count = 1000 ) : Runner( _count ) { list = &_list; };
+	PushBackRunner( const char *_name, listT &_list, int _count = 0 ) : Runner( _name, _count ) { list = &_list; };
 protected:
 	void action() {
 		itemT	item;
@@ -39,36 +40,55 @@ protected:
 		}
 	}
 
-private:
+protected:
 	listT	*list;
 };
 
-void race( Runner &a, Runner &b, int count )
+class PushBackRigidRunner : public PushBackRunner<rigid_list<std::string>, std::string>
 {
-	a.SetCount( count );
-	b.SetCount( count );
-	a.Run();
-	b.Run();
-	printf("count: %d\nrigid: %f\n  std: %f\n", count, a.Result(), b.Result() );
-	
-}
+public:
+	PushBackRigidRunner( const char *_name, rigid_list<std::string> &_list, int _count = 0 ) : PushBackRunner( _name, _list, _count ) {};
+protected:
+	void init() { list->reserve( count ); };
+};
+
+class Race
+{
+public:
+	Race( const char *_name, Runner &a, Runner &b ) { name = _name; runnerA = &a; runnerB = &b; };
+	void Go( int count ) { lastCount = count; runnerA->SetCount( count ); runnerB->SetCount( count ); runnerA->Run(); runnerB->Run(); PrintResults(); };
+	void PrintResults() { printf("---\nRace: %s, count = %d\n1) %s: %f\n2) %s: %f\n", name.c_str(), lastCount, runnerA->name.c_str(), runnerA->Result(), runnerB->name.c_str(), runnerB->Result() );
+								std::string *winnerName;
+								double winnerFactor;
+								if( runnerA->Result() < runnerB->Result() ) {
+									winnerName = &runnerA->name;
+									winnerFactor = runnerB->Result() / runnerA->Result();
+								} else {
+									winnerName = &runnerB->name;
+									winnerFactor = runnerA->Result() / runnerB->Result();
+								}
+								printf("Winner: %s (%f x faster)\n", winnerName->c_str(), winnerFactor );
+	};
+	std::string name;
+protected:
+	Runner *runnerA;
+	Runner *runnerB;
+	int lastCount;
+};
 
 int main() {
 
 	rigid_list<std::string> rl;
 	std::list<std::string> sl;
 
-	PushBackRunner<rigid_list<std::string>, std::string> rrun( rl );
-	PushBackRunner<std::list<std::string>, std::string> srun( sl );
+	PushBackRigidRunner rrun( "rigid_list", rl );
+	PushBackRunner<std::list<std::string>, std::string> srun( "std_list", sl );
 
-	rl.reserve( 10 );
-	race( rrun, srun, 10 );
-
-	rl.reserve( 100 );
-	race( rrun, srun, 100 );
-
-	rl.reserve( 1000 );
-	race( rrun, srun, 1000 );
+	Race pushBackRace( "push_back()", rrun, srun );
+	pushBackRace.Go( 10 );
+	pushBackRace.Go( 100 );
+	pushBackRace.Go( 1000 );
+	pushBackRace.Go( 10000 );
 
 	return 0;
 }
