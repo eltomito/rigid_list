@@ -4,14 +4,13 @@ A version of std::list that only allocates memory when you tell it to.
 ##EXAMPLE
 
 ```
-rigid_list<int> list(10);
-printf("capacity = %d, size = %d, free size = %d.\n",
-       (int)list.capacity(), (int)list.size(), (int)list.free_size() );
-//prints out: capacity = 10, size = 0, free size = 10.
+rigid_list<std::string> list;
+list.reserve(10);
 int i = 0;
-while( list.push_back(i) ) { i++; }
-printf("The last element that fit in the list was %d.\n", *(--list.end()) );
-//prints out: The last element that fit in the list was 9.
+while( list.push_back("some string") ) { i++; }
+printf("capacity  = %d\n", (int)list.capacity() );  // 10
+printf("size      = %d\n", (int)list.size() );      // 10
+printf("free size = %d\n", (int)list.free_size() ); // 0
 ```
 
 rigid_list is the same as std::list except that it only uses preallocated memory and fails to grow when it runs out of it.
