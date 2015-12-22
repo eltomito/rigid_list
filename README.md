@@ -3,7 +3,7 @@ A version of std::list that only allocates memory when you tell it to.
 
 ##EXAMPLE
 
-```
+```C++
 rigid_list<std::string> list;
 list.reserve(10);
 int i = 0;
